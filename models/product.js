@@ -2,19 +2,30 @@
 // const sequelize = require('../util/database');
 const mongoDb = require('mongodb');
 const getDb = require('../util/database').getDb;
+const ObjectId = mongoDb.ObjectId;
 
 class Product {
-  constructor(title, price, description, imageURL) {
+  constructor(title, price, description, imageURL, _id, userId) {
     this.title = title;
     this.price = price;
     this.description = description;
     this.imageURL = imageURL;
+    this._id = _id ? new ObjectId(_id) : null;
+    this.userId = userId;
   }
 
   save() {
     const db = getDb();
-    return db.collection('products')
-      .insertOne(this)
+    let dbOperation;
+    if (this._id) {
+      dbOperation = db.collection('products')
+        .updateOne({_id: (this._id)}, {$set: this} );
+    } else {
+      
+      dbOperation =  db.collection('products')
+        .insertOne(this)
+    }
+    return dbOperation
       .then(result => {
         console.log(result);
       })
@@ -29,7 +40,6 @@ class Product {
     .find()
     .toArray()
     .then(products => {
-      console.log(products);
       return products;
     })
     .catch(err => {
@@ -43,8 +53,19 @@ class Product {
       .find({ _id:mongoDb.ObjectId(prodId) })
       .next()
       .then(product => {
-        console.log(product);
         return product
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  }
+
+  static deleteById(prodId) {
+    const db = getDb();
+    return db.collection('products')
+      .deleteOne({_id: new mongoDb.ObjectId(prodId)})
+      .then(result => {
+        console.log('deleted');
       })
       .catch(err => {
         console.log(err);
