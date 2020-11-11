@@ -2,17 +2,10 @@ const path = require('path');
 
 const express = require('express');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 
 const errorController = require('./controllers/error');
-const mongoConnect = require('./util/database').mongoConnect;
 const User = require('./models/user');
-// const sequelize = require('./util/database');
- //const Product = require('./models/product');
-// const User = require('./models/user');
-// const Cart = require('./models/cart');
-// const CartItem = require('./models/cart-item');
-// const Order = require('./models/order');
-// const OrderItem = require('./models/order-item');
 
 const app = express();
 
@@ -26,10 +19,9 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use((req,res,next) => {
-    User.findById('5faa91b72585390dbb395273')
+    User.findById('5fabe18b6b7a7632f49d7e56')
         .then(user => {
-            req.user = new User(user.name, user.email, user.cart, user._id);
-            console.log(user);
+            req.user = user;
             next(); 
         })
         .catch(err => {
@@ -42,39 +34,21 @@ app.use((req,res,next) => {
 
 app.use(errorController.get404);
 
-mongoConnect(() => {
-    app.listen(3000);
-});
-
-// Product.belongsTo(User, {constraints: true, onDelete: 'CASCADE'});
-// User.hasMany(Product);
-// User.hasOne(Cart);
-// Cart.belongsToMany(Product, { through: CartItem});
-// Product.belongsToMany(Cart, { through: CartItem});
-// Order.belongsTo(User);
-// User.hasMany(Order);
-// Order.belongsToMany(Product, { through: OrderItem});
-
-// sequelize
-//     .sync()
-//     //.sync( {force: true})
-//     .then(result => {
-//         return User.findByPk(1);
-//     })
-//     .then(user => {
-//         if(!user) {
-//             return User.create({name: 'Dummy', email: 'dummy@dummy.com'});
-//         };
-//         return user;
-//     })
-//     .then(user => {
-//         return user.createCart();
-//     })
-//     .then(cart => {
-//         app.listen(3000);
-//     })
-//     .catch(err => {
-//         console.log(err);
-//     });
-
-
+mongoose
+    .connect('mongodb+srv://mongoUser:ToJeStTeSt@cluster0.4gi4k.mongodb.net/<dbname>?retryWrites=true&w=majority')
+    .then(result => {
+        User.findOne().then(user => {
+            if (!user) {
+                const user = new User({
+                    name: 'Dummy',
+                    email: 'dummy@dum.com',
+                    cart: {
+                        items: []
+                    }
+                });
+                user.save();
+            }
+        });
+        app.listen(3000);
+    })
+    .catch(err => console.log(err));

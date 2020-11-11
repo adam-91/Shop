@@ -1,8 +1,32 @@
-// const Sequelize = require('sequelize');
-// const sequelize = require('../util/database');
-const mongoDb = require('mongodb');
-const getDb = require('../util/database').getDb;
-const ObjectId = mongoDb.ObjectId;
+const mongoose = require('mongoose');
+
+const Schema = mongoose.Schema;
+
+const productSchema = new Schema({
+  title: {
+    type: String,
+    required: true
+  },
+  price: {
+    type: Number,
+    required: true
+  },
+  description: {
+    type: String,
+    required: true
+  },
+  imageURL: {
+    type: String,
+    required: true
+  },
+  userId: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  }
+});
+
+module.exports = mongoose.model('Product', productSchema);
 
 class Product {
   constructor(title, price, description, imageURL, _id, userId) {
@@ -29,9 +53,7 @@ class Product {
       .then(result => {
         console.log(result);
       })
-      .catch(err => {
-        console.log(err);
-    });
+      .catch(err => console.log(err));
   }
 
   static fetchAll() {
@@ -42,9 +64,7 @@ class Product {
     .then(products => {
       return products;
     })
-    .catch(err => {
-      console.log(err);
-    });
+    .catch(err => console.log(err));
   }
 
   static findById(prodId) {
@@ -55,9 +75,7 @@ class Product {
       .then(product => {
         return product
       })
-      .catch(err => {
-        console.log(err);
-      });
+      .catch(err => console.log(err));
   }
 
   static deleteById(prodId) {
@@ -67,9 +85,7 @@ class Product {
       .then(result => {
         console.log('deleted');
       })
-      .catch(err => {
-        console.log(err);
-      });
+      .catch(err => console.log(err));
   }
 }
 
@@ -95,4 +111,4 @@ class Product {
 //   }
 // });
 
-module.exports = Product;
+//module.exports = Product;
